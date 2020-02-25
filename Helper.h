@@ -8,7 +8,7 @@
 using namespace std;
 class Helper{
 public:
-  int timedate&clock(){
+  int timedateUclock(){//time date unit clock
     int y,mo,md,wd,h,mi,s;
     time_t t;
     time(NULL);
@@ -21,7 +21,7 @@ public:
     h=t_m->tm_hour;
     mi=t_m->tm_min;
     s=t_m->tm_sec;
-//Надо подумать!!!Как это вывести?
+    
   }
 private:
 };
