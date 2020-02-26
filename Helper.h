@@ -6,6 +6,7 @@
 #include<fstream>
 #define CreateWindowA
 using namespace std;
+char *AlInf[500];
 class Helper{
 public:
   char timedateUclock(int i){//time date unit clock
