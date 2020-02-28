@@ -110,5 +110,8 @@ public:
     fin.close();
     return i;
   }
+  int SecThr(){
+    
+  }
 private:
 };
