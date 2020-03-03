@@ -55,29 +55,36 @@ LRESULT CALLBACK MainWinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 }
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, LPSTR lpCmdLine, int nCmdShow)
 {
-  WNDCLASSEX windowsclass;
+  WNDCLASSEX wc;
   HWND hwnd;
   MSG msg;
   if (!SUCCEEDED(D2D1CreateFactory(D2D1_FACTORY_TYPE::D2D1_FACTORY_TYPE_SINGLE_THREADED, &pD2D1Factory)))
     return EXIT_FAILURE;
   pD2D1Factory->GetDesktopDpi(&dpiX, &dpiY);
-  windowsclass.cbSize = sizeof(WNDCLASSEX);
-  windowsclass.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC | CS_DBLCLKS;
-  windowsclass.lpfnWndProc = MainWinProc;
-  windowsclass.cbClsExtra = 0;
-  windowsclass.cbWndExtra = 0;
-  windowsclass.hInstance = hinstance;
-  windowsclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-  windowsclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-  windowsclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
-  windowsclass.lpszMenuName = NULL;
-  windowsclass.lpszClassName = "TimerClass";
-  windowsclass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-
+  wc.cbSize = sizeof(WNDCLASSEX);
+  wc.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC | CS_DBLCLKS;
+  wc.lpfnWndProc = MainWinProc;
+  wc.cbClsExtra = 0;
+  wc.cbWndExtra = 0;
+  wc.hInstance = hinstance;
+  wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+  wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+  wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+  wc.lpszMenuName = NULL;
+  wc.lpszClassName = "TimerClass";
+  wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+  wc.hInstance = hInstance;
+  wc.lpfnWndProc(HWND hwnd, UINT uMsg, WPARAM wParam,LPARAM lParam)->LRESULT
+  {
+    switch(uMsg){
+      case WM_DESTROY:{
+        hbutton=CreateWindow(30,30,);
+        return 0;
+      };
+    }
   if (!RegisterClassEx(&windowsclass))
     return 0;
-  if (!(hwnd = CreateWindowEx(NULL, "TimerClass", "Timer", WS_DLGFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZE, 0, 0, 600, 500, NULL, NULL, hinstance, NULL)))
-    return(0);
+  hwnd = CreateWindowA(NULL, "TimerClass", "Timer", WS_DLGFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZE, 0, 0, 600, 500, NULL, NULL, hinstance, NULL);
   HRESULT hr = pD2D1Factory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(), D2D1::HwndRenderTargetProperties(hwnd, D2D1::SizeU(600, 500)), &pRT);
   if (!SUCCEEDED(hr))
   {
