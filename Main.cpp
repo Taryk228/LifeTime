@@ -1,103 +1,160 @@
 #include"Helper.h"
 #pragma comment(lib,"d2d1")
+#pragma comment(lib,"dwrite")
 #include <d2d1.h>
-float dpiX, dpiY;
+#include "d2dfunc.h"
+#include "UiDraw.h"
+#include <windowsx.h>
+#include <dwrite.h>
+#include <string>
+HWND hwnd;
+extern float dpiX, dpiY;
+extern int AppWidth, AppHeight;
 ID2D1Factory* pD2D1Factory = NULL;
-ID2D1HwndRenderTarget* pRT = NULL;
-ID2D1SolidColorBrush *pBrush = NULL;
-float pixelToDipX(float x)
-{
-  return (x * 96.0f) / dpiX;
-}
-float pixelToDipY(float y)
-{
-  return (y * 96.0f) / dpiY;
-}
+ID2D1SolidColorBrush *pSolidBrush = NULL;
+IDWriteFactory* pDWriteFactory = NULL;
+ID2D1DCRenderTarget* pDCRT = NULL;
+IDWriteTextFormat* pTextFormat = NULL;
+HDC hWindowDC;
+RECT WindowRect;
+Buttons TButtons;
 LRESULT CALLBACK MainWinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-
 {
-  switch (msg)
-  {
-  case WM_PAINT:
-  {
-    PAINTSTRUCT ps;
-    BeginPaint(hwnd, &ps);
-    pRT->BeginDraw();
-    pRT->Clear(D2D1::ColorF(0.141f,0.321f, 0.541f));
+	switch (msg)
+	{
+	case WM_PAINT:
+	case WM_DISPLAYCHANGE:
+	{
+		PAINTSTRUCT ps;
+		BeginPaint(hwnd, &ps);
+		hWindowDC = ps.hdc;
+		pDCRT->BindDC(hWindowDC, &WindowRect);
+		pDCRT->BeginDraw();
+		pDCRT->Clear(D2D1::ColorF(0.078431f, 0.050980f, 0.129412f));
+		DrawWindowFrame();
+		DrawWindowTitleBar();
+		pDCRT->EndDraw();
+		EndPaint(hwnd, &ps);
+	}
+	return 0;
+	case WM_CREATE:
+	{
+	if (!CreateUiControls(hwnd))
+			SendMessage(hwnd, WM_DESTROY, 0, 0);
+		GetClientRect(hwnd, &WindowRect);
+	}
+	break;
+	case WM_LBUTTONDOWN:
+	{
+		ReleaseCapture();
+		SendMessage(hwnd, WM_SYSCOMMAND, 61458, 0);
+	}
+	break;
+	case WM_DRAWITEM:
+	{
+		DrawUiButtons(wparam, reinterpret_cast<PDRAWITEMSTRUCT>(lparam));
+	}
+	break;
+	case WM_COMMAND:
+	{
+		UiClick(LOWORD(wparam),hwnd);
+	}
+	break;
+	case WM_NCCALCSIZE:
+	{
 
-    pRT->FillRectangle(D2D1::RectF(pixelToDipX(10.0f), pixelToDipY(10.0f), pixelToDipX(110.0f), pixelToDipY(110.0f)), pBrush);
+		if (wparam == TRUE)
+			SetWindowLong(hwnd, 0, 0);
+		return TRUE;
+		return FALSE;
+	}
+	break;
 
-    pRT->EndDraw();
-    EndPaint(hwnd, &ps);
-  }
-  return 0;
-  case WM_DESTROY:
-  {
-    if (pD2D1Factory) {
-      pD2D1Factory->Release();
-      pD2D1Factory = NULL;
-    }
-    if (pRT) {
-      pRT->Release();
-      pRT = NULL;
-    }
-    if (pBrush)
-    {
-      pBrush->Release();
-      pBrush = NULL;
-    }
-    PostQuitMessage(0);
-    return(0);
-  }
-  break;
-  }
-  return(DefWindowProc(hwnd, msg, wparam, lparam));
+	case WM_NCHITTEST:
+	{
+		SetWindowLong(hwnd, DWL_MSGRESULT, HTCAPTION);
+		return 1;
+	}
+	break;
+	case WM_NCCREATE:
+	{
+		LPCREATESTRUCT lpcs = (LPCREATESTRUCT)lparam;
+
+		lpcs->style &= ~WS_CAPTION;
+		SetWindowLong(hwnd, GWL_STYLE, lpcs->style);
+	}
+	return 1;
+	case WM_DESTROY:
+	{
+		if (pD2D1Factory) {
+			pD2D1Factory->Release();
+			pD2D1Factory = NULL;
+		}
+		if (pDCRT) {
+			pDCRT->Release();
+			pDCRT = NULL;
+		}
+		if (pSolidBrush)
+		{
+			pSolidBrush->Release();
+			pSolidBrush = NULL;
+		}
+		PostQuitMessage(0);
+		return(0);
+	}
+	break;
+	}
+	return(DefWindowProc(hwnd, msg, wparam, lparam));
 }
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, LPSTR lpCmdLine, int nCmdShow)
 {
-  WNDCLASSEX wc;
-  HWND hwnd;
-  MSG msg;
-  if (!SUCCEEDED(D2D1CreateFactory(D2D1_FACTORY_TYPE::D2D1_FACTORY_TYPE_SINGLE_THREADED, &pD2D1Factory)))
-    return EXIT_FAILURE;
-  pD2D1Factory->GetDesktopDpi(&dpiX, &dpiY);
-  wc.cbSize = sizeof(WNDCLASSEX);
-  wc.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC | CS_DBLCLKS;
-  wc.lpfnWndProc = MainWinProc;
-  wc.cbClsExtra = 0;
-  wc.cbWndExtra = 0;
-  wc.hInstance = hinstance;
-  wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-  wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-  wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
-  wc.lpszMenuName = NULL;
-  wc.lpszClassName = "TimerClass";
-  wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-  wc.hInstance = hInstance;
-  wc.lpfnWndProc(HWND hwnd, UINT uMsg, WPARAM wParam,LPARAM lParam)->LRESULT
-  {
-    switch(uMsg){
-      case WM_DESTROY:{
-        hbutton=CreateWindow(30,30,);
-        return 0;
-      };
-    }
-  if (!RegisterClassEx(&windowsclass))
-    return 0;
-  hwnd = CreateWindowA(NULL, "TimerClass", "Timer", WS_DLGFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZE, 0, 0, 600, 500, NULL, NULL, hinstance, NULL);
-  HRESULT hr = pD2D1Factory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(), D2D1::HwndRenderTargetProperties(hwnd, D2D1::SizeU(600, 500)), &pRT);
-  if (!SUCCEEDED(hr))
-  {
-    return EXIT_FAILURE;
-  }
 
-  pRT->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::SlateGray), &pBrush);
-  ShowWindow(hwnd, nCmdShow);
-  UpdateWindow(hwnd);
-  while (GetMessage(&msg, NULL, 0, 0))
-  {
-    TranslateMessage(&msg);
-    DispatchMessage(&msg);
-  }
-  return msg.wParam;
+	HRESULT hr = CoInitialize(NULL);
+	if (!SUCCEEDED(hr))
+		return false;
+	WNDCLASSEX windowsclass;
+	MSG msg;
+	windowsclass.cbSize = sizeof(WNDCLASSEX);
+	windowsclass.style = CS_VREDRAW | CS_HREDRAW ;
+	windowsclass.lpfnWndProc = MainWinProc;
+	windowsclass.cbClsExtra = 0;
+	windowsclass.cbWndExtra = 0;
+	windowsclass.hInstance = hinstance;
+	windowsclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	windowsclass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	windowsclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	windowsclass.lpszMenuName = NULL;
+	windowsclass.lpszClassName = "TimerClass";
+	windowsclass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+
+	if (!RegisterClassEx(&windowsclass))
+		return 0;
+	if (!(hwnd = CreateWindowEx(NULL, "TimerClass", "Timer", WS_CAPTION | WS_POPUP, (GetSystemMetrics(SM_CXSCREEN) - AppWidth) / 2, (GetSystemMetrics(SM_CYSCREEN) - AppHeight) / 2, AppWidth, AppHeight, NULL, NULL, hinstance, NULL)))
+		return(0);
+
+	if (d2dUnit(&pD2D1Factory, &pDCRT, &pSolidBrush) == EXIT_FAILURE)
+		return EXIT_FAILURE;
+
+	 hr = DWriteCreateFactory(DWRITE_FACTORY_TYPE_ISOLATED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(&pDWriteFactory));
+	if (!SUCCEEDED(hr))
+		return EXIT_FAILURE;
+	pDWriteFactory->CreateTextFormat(
+		L"Roboto",
+		nullptr,
+		DWRITE_FONT_WEIGHT_BOLD,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		24.0f,
+		L"",
+		&pTextFormat
+	);
+
+	ShowWindow(hwnd, SW_SHOW);
+	UpdateWindow(hwnd);
+	while (GetMessage(&msg, NULL, 0, 0))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+	return msg.wParam;
 }
