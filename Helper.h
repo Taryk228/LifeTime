@@ -6,7 +6,7 @@
 #include<fstream>
 #define CreateWindowA
 using namespace std;
-class timer{
+class func{
 public:
   char *AlInf[500];
   char timedateUclock(int i){//time date unit clock
