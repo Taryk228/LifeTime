@@ -91,14 +91,14 @@ char f:timedateUclock(int i){//time date unit clock
   }
   return tim;
 }
-int ChartoTXT(char i[100]){
+int f:ChartoTXT(char i[100]){
     ofstream fout;
     fout.open("i.txt");
     fout.write(i,100);
     four.close();
     return 0;
   }
-char TxttoCHAR(){
+char f:TxttoCHAR(){
     char i[200];
     ifstream fin;
     fin.open("i.txt");
@@ -106,12 +106,12 @@ char TxttoCHAR(){
     fin.close();
     return i;
   }
-double Calc(){
+double f:Calc(){
   
   }
-char Settings(){
+char f:Settings(){
   
   }
-int SecThr(){
+int f:SecThr(){
     
   }
