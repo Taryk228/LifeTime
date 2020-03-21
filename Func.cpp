@@ -87,7 +87,31 @@ char f:timedateUclock(int i){//time date unit clock
       tim[6]=59;//':'
       tim[7]=(s/10)+48;
       tim[8]=(s%10)+48;
-      }
     }
-    return tim;
+  }
+  return tim;
+}
+int ChartoTXT(char i[100]){
+    ofstream fout;
+    fout.open("i.txt");
+    fout.write(i,100);
+    four.close();
+    return 0;
+  }
+char TxttoCHAR(){
+    char i[200];
+    ifstream fin;
+    fin.open("i.txt");
+    fin.read(i,200);
+    fin.close();
+    return i;
+  }
+double Calc(){
+  
+  }
+char Settings(){
+  
+  }
+int SecThr(){
+    
   }
