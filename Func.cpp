@@ -2,9 +2,6 @@
 //here will be realization of class func{};
 func f;
 
-double f:calc(){
-
-}
 char f:timedateUclock(int i){//time date unit clock
     char tim[20]="";
     int y,mo,md,wd,h,mi,s;
@@ -107,11 +104,22 @@ char f:TxttoCHAR(){
     return i;
   }
 double f:Calc(){
-  
-  }
+  hbutton=CreateWindow("BUTTON","+",
+WS_VISIBLE|WS_CHILD|BS_PUSHBUTTON,
+<HMENU>(901),300,300,30,30,nullptr,nullptr);
+  hbutton=CreateWindow("BUTTON","-",
+WS_VISIBLE|WS_CHILD|BS_PUSHBUTTON,
+<HMENU>(902),330,300,30,30,nullptr,nullptr);
+  hbutton=CreateWindow("BUTTON","/",
+WS_VISIBLE|WS_CHILD|BS_PUSHBUTTON,
+<HMENU>(903),360,300,30,30,nullptr,nullptr);
+  hbutton=CreateWindow("BUTTON","*",
+WS_VISIBLE|WS_CHILD|BS_PUSHBUTTON,
+<HMENU>(901),390,300,30,30,nullptr,nullptr);
+}
 char f:Settings(){
   
-  }
+}
 int f:SecThr(){
     
   }
